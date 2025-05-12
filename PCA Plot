@@ -1,0 +1,55 @@
+library("dplyr")
+library("ggplot2")
+library("openxlsx")
+library("ggfortify")
+library("readxl")
+library("plotly")
+setwd('R')
+
+#load in sheet with data from HCC1954 WT
+PCA_Cyto_killing_data_HCC1954 <- read.xlsx("~/PCA_data - HCC.xlsx", sheet = "PCA_Combined_Cyto_Killing_HCC")
+
+#Convert first row as column names and remove the first row
+rownames(PCA_Cyto_killing_data_HCC1954)<-PCA_Cyto_killing_data_HCC1954[,1]
+PCA_Cyto_killing_data_HCC1954<-PCA_Cyto_killing_data_HCC1954[,-1]
+
+pr_comp_ready_HCC_CombCyto_killing <- PCA_Cyto_killing_data_HCC1954[,1:6]
+
+Unique_colour_values <- unique(PCA_Cyto_killing_data_HCC1954$Colour)
+
+#Create PCA Data
+pca_res_HCC1954_CombCyto_Killing <- prcomp(pr_comp_ready_HCC_CombCyto_killing, center = TRUE, scale. = TRUE)
+
+#summary of the prcomp object
+summary(pca_res_HCC1954_CombCyto_Killing)
+#print PCA
+my_colours <- c("Control" = "green", "HCC Candidate " = "red", "MDA Candidate  " = "blue", "Not a Candidate" = "grey")
+
+HCC1954_Cyto_Killing <- autoplot(pca_res_HCC1954_CombCyto_Killing, data = PCA_Cyto_killing_data_HCC1954, colour = "Colour", 
+                         label = TRUE, label.repel = TRUE, label.text = element_text(size=20),
+                         loadings = TRUE, loadings.color = 'grey28', loadings.label = TRUE, loadings.label.colour = 'grey28', loadings.label.size = 3, loadings.label.repel = TRUE
+                          ) + scale_color_manual(values = my_colours)
+plot(HCC1954_Cyto_Killing)
+
+#load in sheet with data from MDA 
+PCA_Cyto_killing_data_MDA <- read.xlsx("~/PCA_data - MDA.xlsx", sheet = "PCA_Combined_Cyto_Killing_MDA")
+
+#Convert first row as column names and remove the first row
+rownames(PCA_Cyto_killing_data_MDA)<-PCA_Cyto_killing_data_MDA[,1]
+PCA_Cyto_killing_data_MDA<-PCA_Cyto_killing_data_MDA[,-1]
+
+pr_comp_ready_MDA_Cyto_Killing <- PCA_Cyto_killing_data_MDA[,1:6]
+
+#Create PCA Data
+pca_res_MDA_Cyto <- prcomp(pr_comp_ready_MDA_Cyto_Killing, scale. = TRUE)
+
+#summary of the prcomp object
+summary(pca_res_MDA_Cyto)
+#print PCA
+MDA_Cyto <- autoplot(pca_res_MDA_Cyto, data = PCA_Cyto_killing_data_MDA, colour = "Colour",
+                     label = TRUE, label.repel = TRUE, 
+                     loadings = TRUE, loadings.color = 'black', loadings.label = TRUE, loadings.label.size = 3, loadings.label.colour = 'black', loadings.label.repel = T
+) + scale_color_manual(values = my_colours)
+plot(MDA_Cyto)
+
+excel_sheets("~/PCA_data - HCC.xlsx")
